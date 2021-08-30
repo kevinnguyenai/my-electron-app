@@ -1,4 +1,4 @@
-const {app, BrowserWindow, mainWindow} = require('electron')
+const {app, BrowserWindow, mainWindow, Menu, MenuItem} = require('electron')
 const url = require('url')
 const path = require('path')
 const {ipcMain} = require('electron')
@@ -22,35 +22,85 @@ function createWindow() {
    }))
 }
 
+const template = [
+   {
+      label: 'Edit',
+      submenu: [
+         {
+            role: 'undo'
+         },
+         {
+            role: 'redo'
+         },
+         {
+            type: 'separator'
+         },
+         {
+            role: 'cut'
+         },
+         {
+            role: 'copy'
+         },
+         {
+            role: 'paste'
+         }
+      ]
+   },
+   
+   {
+      label: 'View',
+      submenu: [
+         {
+            role: 'reload'
+         },
+         {
+            role: 'toggledevtools'
+         },
+         {
+            type: 'separator'
+         },
+         {
+            role: 'resetzoom'
+         },
+         {
+            role: 'zoomin'
+         },
+         {
+            role: 'zoomout'
+         },
+         {
+            type: 'separator'
+         },
+         {
+            role: 'togglefullscreen'
+         }
+      ]
+   },
+   
+   {
+      role: 'window',
+      submenu: [
+         {
+            role: 'minimize'
+         },
+         {
+            role: 'close'
+         }
+      ]
+   },
+   
+   {
+      role: 'help',
+      submenu: [
+         {
+            label: 'Learn More'
+         }
+      ]
+   }
+]
 
-ipcMain.on('openFile', (event, path) => { 
-   const {dialog} = require('electron') 
-   const fs = require('fs')
-   console.log('openFile Event')
-   dialog.showOpenDialog(mainWindow, {
-      properties: ['openFile', 'multiSelections']
-    }).then(result => {
-      console.log(result.canceled)
-      console.log(result.filePaths)
-      readFile(result.filePaths[0])
-    }).catch(err => {
-      console.log(err)
-    })
-
-   function readFile(filepath) { 
-      fs.readFile(filepath, 'utf-8', (err, data) => { 
-         
-         if(err){ 
-            alert("An error ocurred reading the file :" + err.message) 
-            return 
-         } 
-         
-         // handle the file content
-         event.sender.send('fileData', data) 
-         console.log("Send Data File")
-      }) 
-   } 
-}) 
+const menu = Menu.buildFromTemplate(template)
+Menu.setApplicationMenu(menu)
 
 app.on('ready', createWindow)
 
